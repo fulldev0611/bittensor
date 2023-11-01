@@ -1,38 +1,5 @@
 # Changelog
 
-## 6.0.1 / 2023-10-02
-
-## What's Changed
-* Fix requirements/prod.txt, we had a bad format dependency not allowed by PyPi by @eduardogr in https://github.com/opentensor/bittensor/pull/1537
-
-
-**Full Changelog**: https://github.com/opentensor/bittensor/compare/v6.0.0...v6.0.1
-
-
-## 6.0.0 / 2023-10-02
-
-## What's Changed
-* - Adjusted blacklist argument default to False by @Inquinim in https://github.com/opentensor/bittensor/pull/1448
-* Release/5.3.1 by @camfairchild in https://github.com/opentensor/bittensor/pull/1444
-* Release/5.3.2 by @ifrit98 in https://github.com/opentensor/bittensor/pull/1462
-* [hotfix] Release v5.3.3 by @camfairchild in https://github.com/opentensor/bittensor/pull/1467
-* Update README.md by @unconst in https://github.com/opentensor/bittensor/pull/1477
-* Release/5.3.4 by @ifrit98 in https://github.com/opentensor/bittensor/pull/1483
-* Revolution by @unconst in https://github.com/opentensor/bittensor/pull/1450
-
-
-**Full Changelog**: https://github.com/opentensor/bittensor/compare/v5.3.0...v6.0.0
-
-
-## 6.0.1 / 2023-10-02
-
-## What's Changed
-* Fix requirements/prod.txt, we had a bad format dependency not allowed by PyPi by @eduardogr in https://github.com/opentensor/bittensor/pull/1537
-
-
-**Full Changelog**: https://github.com/opentensor/bittensor/compare/v6.0.0...v6.0.1
-
-
 ## 5.3.4 / 2023-08-16
 
 # What's Changed
@@ -70,13 +37,14 @@
 
 ## 5.3.1 / 2023-07-06
 
- ## What's Changed
- * bump bittensor-wallet req, update cryptography security req by @@ifrit98 in [91d13b0](https://github.com/opentensor/bittensor/commit/91d13b0fa711621cbf823708d4368b1b387e42c4)
- * Fixes Discord Link Issue #1442  by @camfairchild in [54d6248](https://github.com/opentensor/bittensor/commit/54d62487d4cb59e0b5edcd53acdca013108d155b)
- * move mocks to bittensor_wallet package by @camfairchild in https://github.com/opentensor/bittensor/pull/1441
- * Bump bittensor-wallet version to 0.0.4
+## What's Changed
+* bump bittensor-wallet req, update cryptography security req by @@ifrit98 in [91d13b0](https://github.com/opentensor/bittensor/commit/91d13b0fa711621cbf823708d4368b1b387e42c4)
+* Fixes Discord Link Issue #1442  by @camfairchild in [54d6248](https://github.com/opentensor/bittensor/commit/54d62487d4cb59e0b5edcd53acdca013108d155b)
+* move mocks to bittensor_wallet package by @camfairchild in https://github.com/opentensor/bittensor/pull/1441
+* Bump bittensor-wallet version to 0.0.4
 
- **Full Changelog**: https://github.com/opentensor/bittensor/compare/v5.3.0...v5.3.1
+**Full Changelog**: https://github.com/opentensor/bittensor/compare/v5.3.0...v5.3.1
+
 
 ## 5.3.0 / 2023-07-04
 

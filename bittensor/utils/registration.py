@@ -57,7 +57,7 @@ class POWSolution:
     difficulty: int
     seal: bytes
 
-    def is_stale(self, subtensor: "bittensor.subtensor") -> bool:
+    def is_stale(self, subtensor: "bittensor.Subtensor") -> bool:
         """Returns True if the POW is stale.
         This means the block the POW is solved for is within 3 blocks of the current block.
         """
@@ -444,12 +444,14 @@ class RegistrationStatisticsLogger:
         if self.status is not None:
             self.status.update(self.get_status_message(stats, verbose=verbose))
         else:
-            self.console.log(self.get_status_message(stats, verbose=verbose))
+            self.console.log(
+                self.get_status_message(stats, verbose=verbose),
+            )
 
 
 def _solve_for_difficulty_fast(
     subtensor,
-    wallet: "bittensor.wallet",
+    wallet: "bittensor.Wallet",
     netuid: int,
     output_in_place: bool = True,
     num_processes: Optional[int] = None,
@@ -464,7 +466,7 @@ def _solve_for_difficulty_fast(
         subtensor
             Subtensor to connect to for block information and to submit.
         wallet:
-            wallet to use for registration.
+            Wallet to use for registration.
         netuid: int
             The netuid of the subnet to register to.
         output_in_place: bool
@@ -505,9 +507,7 @@ def _solve_for_difficulty_fast(
     finished_queues = [multiprocessing.Queue() for _ in range(num_processes)]
     check_block = multiprocessing.Lock()
 
-    hotkey_bytes = (
-        wallet.coldkeypub.public_key if netuid == -1 else wallet.hotkey.public_key
-    )
+    hotkey_bytes = wallet.hotkey.public_key
     # Start consumers
     solvers = [
         _Solver(
@@ -578,8 +578,9 @@ def _solve_for_difficulty_fast(
     hash_rates = [0] * n_samples  # The last n true hash_rates
     weights = [alpha_**i for i in range(n_samples)]  # weights decay by alpha
 
-    while netuid == -1 or not subtensor.is_hotkey_registered(
-        netuid=netuid, hotkey_ss58=wallet.hotkey.ss58_address
+    while not subtensor.is_hotkey_registered(
+        netuid=netuid,
+        hotkey_ss58=wallet.hotkey.ss58_address,
     ):
         # Wait until a solver finds a solution
         try:
@@ -658,13 +659,13 @@ def _solve_for_difficulty_fast(
 
 @backoff.on_exception(backoff.constant, Exception, interval=1, max_tries=3)
 def _get_block_with_retry(
-    subtensor: "bittensor.subtensor", netuid: int
+    subtensor: "bittensor.Subtensor", netuid: int
 ) -> Tuple[int, int, bytes]:
     """
     Gets the current block number, difficulty, and block hash from the substrate node.
 
     Args:
-        subtensor (:obj:`bittensor.subtensor`, `required`):
+        subtensor (:obj:`bittensor.Subtensor`, `required`):
             The subtensor object to use to get the block number, difficulty, and block hash.
 
         netuid (:obj:`int`, `required`):
@@ -685,7 +686,7 @@ def _get_block_with_retry(
         ValueError: If the difficulty is None.
     """
     block_number = subtensor.get_current_block()
-    difficulty = 1_000_000 if netuid == -1 else subtensor.difficulty(netuid=netuid)
+    difficulty = subtensor.difficulty(netuid=netuid)
     block_hash = subtensor.get_block_hash(block_number)
     if block_hash is None:
         raise Exception(
@@ -714,7 +715,7 @@ class _UsingSpawnStartMethod:
 
 
 def _check_for_newest_block_and_update(
-    subtensor: "bittensor.subtensor",
+    subtensor: "bittensor.Subtensor",
     netuid: int,
     old_block_number: int,
     hotkey_bytes: bytes,
@@ -730,7 +731,7 @@ def _check_for_newest_block_and_update(
     Checks for a new block and updates the current block information if a new block is found.
 
     Args:
-        subtensor (:obj:`bittensor.subtensor`, `required`):
+        subtensor (:obj:`bittensor.Subtensor`, `required`):
             The subtensor object to use for getting the current block.
         netuid (:obj:`int`, `required`):
             The netuid to use for retrieving the difficulty.
@@ -789,8 +790,8 @@ def _check_for_newest_block_and_update(
 
 
 def _solve_for_difficulty_fast_cuda(
-    subtensor: "bittensor.subtensor",
-    wallet: "bittensor.wallet",
+    subtensor: "bittensor.Subtensor",
+    wallet: "bittensor.Wallet",
     netuid: int,
     output_in_place: bool = True,
     update_interval: int = 50_000,
@@ -803,9 +804,9 @@ def _solve_for_difficulty_fast_cuda(
     """
     Solves the registration fast using CUDA
     Args:
-        subtensor: bittensor.subtensor
+        subtensor: bittensor.Subtensor
             The subtensor node to grab blocks
-        wallet: bittensor.wallet
+        wallet: bittensor.Wallet
             The wallet to register
         netuid: int
             The netuid of the subnet to register to.
@@ -925,8 +926,9 @@ def _solve_for_difficulty_fast_cuda(
         weights = [alpha_**i for i in range(n_samples)]  # weights decay by alpha
 
         solution = None
-        while netuid == -1 or not subtensor.is_hotkey_registered(
-            netuid=netuid, hotkey_ss58=wallet.hotkey.ss58_address
+        while not subtensor.is_hotkey_registered(
+            netuid=netuid,
+            hotkey_ss58=wallet.hotkey.ss58_address,
         ):
             # Wait until a solver finds a solution
             try:
@@ -1028,9 +1030,9 @@ def create_pow(
     """
     Creates a proof of work for the given subtensor and wallet.
     Args:
-        subtensor (:obj:`bittensor.subtensor.subtensor`, `required`):
+        subtensor (:obj:`bittensor.subtensor.Subtensor`, `required`):
             The subtensor to create a proof of work for.
-        wallet (:obj:`bittensor.wallet.wallet`, `required`):
+        wallet (:obj:`bittensor.wallet.Wallet`, `required`):
             The wallet to create a proof of work for.
         netuid (:obj:`int`, `required`):
             The netuid for the subnet to create a proof of work for.
@@ -1060,9 +1062,8 @@ def create_pow(
     Raises:
         :obj:`ValueError`: If the subnet does not exist.
     """
-    if netuid != -1:
-        if not subtensor.subnet_exists(netuid=netuid):
-            raise ValueError(f"Subnet {netuid} does not exist")
+    if not subtensor.subnet_exists(netuid=netuid):
+        raise ValueError(f"Subnet {netuid} does not exist")
 
     if cuda:
         solution: Optional[POWSolution] = _solve_for_difficulty_fast_cuda(
@@ -1091,20 +1092,20 @@ def create_pow(
 
 def __reregister_wallet(
     netuid: int,
-    wallet: "bittensor.wallet",
-    subtensor: "bittensor.subtensor",
+    wallet: "bittensor.Wallet",
+    subtensor: "bittensor.Subtensor",
     reregister: bool = False,
     prompt: bool = False,
     **registration_args: Any,
-) -> Optional["bittensor.wallet"]:
-    """Re-register this a wallet on the chain, or exits.
+) -> Optional["bittensor.Wallet"]:
+    """Re-register this a Wallet on the chain, or exits.
         Exits if the wallet is not registered on the chain AND
         reregister is set to False.
     Args:
         netuid (int):
             The network uid of the subnet to register on.
-        wallet( 'bittensor.wallet' ):
-            Bittensor wallet to re-register
+        wallet( 'bittensor.Wallet' ):
+            Bittensor Wallet to re-register
         reregister (bool, default=False):
             If true, re-registers the wallet on the chain.
             Exits if False and the wallet is not registered on the chain.
@@ -1113,7 +1114,7 @@ def __reregister_wallet(
         **registration_args (Any):
             The registration arguments to pass to the subtensor register function.
     Return:
-        wallet (bittensor.wallet):
+        wallet (bittensor.Wallet):
             The wallet
 
     Raises:
@@ -1131,7 +1132,10 @@ def __reregister_wallet(
             sys.exit(0)
 
         subtensor.register(
-            wallet=wallet, netuid=netuid, prompt=prompt, **registration_args
+            wallet=wallet,
+            netuid=netuid,
+            prompt=prompt,
+            **registration_args,
         )
 
     return wallet
